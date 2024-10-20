@@ -64,8 +64,6 @@ blueprint:
           step: 10
 alias: Z2M - Tradfri E1743 Switch On Off Dimming Light
 description: ""
-variables:
-  force_brightness: !input force_brightness
 trigger:
   - platform: state
     entity_id: !input source_switch_action
@@ -94,18 +92,8 @@ action:
           - condition: trigger
             id: "on"
         sequence:
-          - choose:
-              - conditions:
-                  - condition: template
-                    value_template: "{{ force_brightness }}"
-                sequence:
-                  - service: light.toggle
-                    target: !input target_light
-                    data:
-                      brightness_pct: !input brightness
-            default:
-              - service: light.toggle
-                target: !input target_light
+          - service: light.toggle
+            target: !input target_light
       - conditions:
           - condition: trigger
             id: "off"
