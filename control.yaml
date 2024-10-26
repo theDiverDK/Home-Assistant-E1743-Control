@@ -96,7 +96,18 @@ trigger:
     to: brightness_stop
 condition: []
 variables:
+  source_switch_action: !input source_switch_action
   target_light: !input target_light
+  helper_transition_dim: !input helper_transition_dim
+  helper_delay: !input helper_delay
+  time_based_brightness_enable: !input time_based_brightness_enable
+  brightness_start_time: !input brightness_start_time
+  brightness_end_time: !input brightness_end_time
+  max_brightness: !input max_brightness
+  current_time: "{{ now().strftime('%H:%M:%S') }}"
+  within_brightness_period: >
+    {{ time_based_brightness_enable and 
+       brightness_start_time <= current_time <= brightness_end_time }}
 action:
   - choose:
       - conditions:
@@ -116,6 +127,8 @@ action:
                 sequence:
                   - service: light.turn_on
                     target: !input target_light
+                    data:
+                      brightness_pct: "{{ max_brightness if within_brightness_period else 100 }}"
       - conditions:
           - condition: trigger
             id: "off"
@@ -133,6 +146,8 @@ action:
                 sequence:
                   - service: light.turn_on
                     target: !input target_light
+                    data:
+                      brightness_pct: "{{ max_brightness if within_brightness_period else 100 }}"
       - conditions:
           - condition: trigger
             id: brightness_move_up
@@ -167,4 +182,19 @@ action:
                     transition: !input helper_transition_dim
                 - delay:
                     milliseconds: !input helper_delay
+  # Debug Section to Output Variables as a Notification
+#  - service: persistent_notification.create
+#    data:
+#      message: >
+#        Debug Info:
+#        - Source Switch Action: {{ source_switch_action }}
+#        - Target Light: {{ target_light.entity_id }}
+#        - Helper Transition Dim: {{ helper_transition_dim }}
+#        - Helper Delay: {{ helper_delay }}
+#        - Time-Based Brightness Enable: {{ time_based_brightness_enable }}
+#        - Brightness Start Time: {{ brightness_start_time }}
+#        - Brightness End Time: {{ brightness_end_time }}
+#        - Max Brightness: {{ max_brightness }}
+#        - Current Time: {{ current_time }}
+#        - Within Brightness Period: {{ within_brightness_period }}
 mode: restart
