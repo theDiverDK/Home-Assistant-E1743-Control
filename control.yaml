@@ -106,8 +106,10 @@ variables:
   max_brightness: !input max_brightness
   current_time: "{{ now().strftime('%H:%M:%S') }}"
   within_brightness_period: >
-    {{ time_based_brightness_enable and 
-       brightness_start_time <= current_time <= brightness_end_time }}
+    {{ time_based_brightness_enable and (
+       (brightness_start_time <= brightness_end_time and brightness_start_time <= current_time <= brightness_end_time) or
+       (brightness_start_time > brightness_end_time and (current_time >= brightness_start_time or current_time <= brightness_end_time))
+    ) }}
 action:
   - choose:
       - conditions:
