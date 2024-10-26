@@ -43,6 +43,34 @@ blueprint:
           max: 2000
           mode: box
           step: 10
+    time_based_brightness_enable:
+      name: Enable Time-Based Brightness
+      description: Enable or disable the time-based brightness settings.
+      default: false
+      selector:
+        boolean: {}
+    brightness_start_time:
+      name: Brightness Start Time
+      description: The time when the brightness control period starts.
+      default: "18:00:00"
+      selector:
+        time: {}
+    brightness_end_time:
+      name: Brightness End Time
+      description: The time when the brightness control period ends.
+      default: "23:00:00"
+      selector:
+        time: {}
+    max_brightness:
+      name: Maximum Brightness
+      description: Maximum brightness percentage (0-100%) during the specified time period.
+      default: 100
+      selector:
+        number:
+          min: 0
+          max: 100
+          mode: slider
+          step: 1
 alias: Z2M - Tradfri E1743 Switch On Off Dimming Light
 description: ""
 trigger:
@@ -67,20 +95,44 @@ trigger:
     id: brightness_stop
     to: brightness_stop
 condition: []
+variables:
+  target_light: !input target_light
 action:
   - choose:
       - conditions:
           - condition: trigger
             id: "on"
         sequence:
-          - service: light.toggle
-            target: !input target_light
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ is_state(target_light.entity_id, 'on') }}"
+                sequence:
+                  - service: light.turn_off
+                    target: !input target_light
+              - conditions:
+                  - condition: template
+                    value_template: "{{ is_state(target_light.entity_id, 'off') }}"
+                sequence:
+                  - service: light.turn_on
+                    target: !input target_light
       - conditions:
           - condition: trigger
             id: "off"
         sequence:
-          - service: light.toggle
-            target: !input target_light
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ is_state(target_light.entity_id, 'on') }}"
+                sequence:
+                  - service: light.turn_off
+                    target: !input target_light
+              - conditions:
+                  - condition: template
+                    value_template: "{{ is_state(target_light.entity_id, 'off') }}"
+                sequence:
+                  - service: light.turn_on
+                    target: !input target_light
       - conditions:
           - condition: trigger
             id: brightness_move_up
