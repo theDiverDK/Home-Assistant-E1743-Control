@@ -139,11 +139,6 @@ action:
                     target: !input target_light
                     data:
                       brightness_pct: "{{ max_brightness if within_brightness_period else 100 }}"
-                  - condition: template
-                    value_template: "{{ target_switches | length > 0 and (not within_brightness_period) }}"
-                  - service: homeassistant.turn_on
-                    target:
-                      entity_id: !input target_switches
               - conditions:
                   - condition: template
                     value_template: "{{ is_state(target_light.entity_id, 'on') }}"
@@ -151,7 +146,7 @@ action:
                   - service: homeassistant.turn_off
                     target: !input target_light
                   - condition: template
-                    value_template: "{{ target_switches | length > 0 and (not within_brightness_period) }}"
+                    value_template: "{{ target_switches | length > 0 }}"
                   - service: homeassistant.turn_off
                     target:
                       entity_id: !input target_switches
@@ -168,22 +163,12 @@ action:
                     target: !input target_light
                     data:
                       brightness_pct: "{{ max_brightness if within_brightness_period else 100 }}"
-                  - condition: template
-                    value_template: "{{ target_switches | length > 0 and (not within_brightness_period) }}"
-                  - service: homeassistant.turn_on
-                    target:
-                      entity_id: !input target_switches
               - conditions:
                   - condition: template
                     value_template: "{{ is_state(target_light.entity_id, 'on') }}"
                 sequence:
                   - service: homeassistant.turn_off
                     target: !input target_light
-                  - condition: template
-                    value_template: "{{ target_switches | length > 0 and (not within_brightness_period) }}"
-                  - service: homeassistant.turn_off
-                    target:
-                      entity_id: !input target_switches
       - conditions:
           - condition: trigger
             id: brightness_move_up
@@ -218,5 +203,21 @@ action:
                     transition: !input helper_transition_dim
                 - delay:
                     milliseconds: !input helper_delay
+  # Debug Section to Output Variables as a Notification
+#  - service: persistent_notification.create
+#    data:
+#      message: >
+#        Debug Info:
+#        - Any Light state: {{ any_light_on }} end
+#        - Expand: {{ expand(target_light.entity_id) }}
+#        - Source Switch Action: {{ source_switch_action }}
+#        - Target Light: {{ target_light.entity_id }}
+#        - Helper Transition Dim: {{ helper_transition_dim }}
+#        - Helper Delay: {{ helper_delay }}
+#        - Time-Based Brightness Enable: {{ time_based_brightness_enable }}
+#        - Brightness Start Time: {{ brightness_start_time }}
+#        - Brightness End Time: {{ brightness_end_time }}
+#        - Max Brightness: {{ max_brightness }}
+#        - Current Time: {{ current_time }}
+#        - Within Brightness Period: {{ within_brightness_period }}
 mode: restart
-
