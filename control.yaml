@@ -31,11 +31,11 @@ blueprint:
       name: Target Switches
       description: The switches you want to control.
       selector:
-        target:
-          entity:
-            domain:
-              - switch
-              - group
+        entity:
+          domain:
+            - switch
+            - group
+          multiple: true
       default: []
     helper_transition_dim:
       name: Helper - Transition time for dimming up / down
@@ -138,6 +138,11 @@ action:
                 sequence:
                   - service: homeassistant.turn_off
                     target: !input target_light
+                  - condition: template
+                    value_template: "{{ target_switches | length > 0 }}"
+                  - service: homeassistant.turn_off
+                    target:
+                      entity_id: !input target_switches
               - conditions:
                   - condition: template
                     value_template: "{{ is_state(target_light.entity_id, 'off') }}"
@@ -200,20 +205,20 @@ action:
                 - delay:
                     milliseconds: !input helper_delay
   # Debug Section to Output Variables as a Notification
-#  - service: persistent_notification.create
-#    data:
-#      message: >
-#        Debug Info:
-#        - Any Light state: {{ any_light_on }} end
-#        - Expand: {{ expand(target_light.entity_id) }}
-#        - Source Switch Action: {{ source_switch_action }}
-#        - Target Light: {{ target_light.entity_id }}
-#        - Helper Transition Dim: {{ helper_transition_dim }}
-#        - Helper Delay: {{ helper_delay }}
-#        - Time-Based Brightness Enable: {{ time_based_brightness_enable }}
-#        - Brightness Start Time: {{ brightness_start_time }}
-#        - Brightness End Time: {{ brightness_end_time }}
-#        - Max Brightness: {{ max_brightness }}
-#        - Current Time: {{ current_time }}
-#        - Within Brightness Period: {{ within_brightness_period }}
+  - service: persistent_notification.create
+    data:
+      message: >
+        Debug Info:
+        - Any Light state: {{ any_light_on }} end
+        - Expand: {{ expand(target_light.entity_id) }}
+        - Source Switch Action: {{ source_switch_action }}
+        - Target Light: {{ target_light.entity_id }}
+        - Helper Transition Dim: {{ helper_transition_dim }}
+        - Helper Delay: {{ helper_delay }}
+        - Time-Based Brightness Enable: {{ time_based_brightness_enable }}
+        - Brightness Start Time: {{ brightness_start_time }}
+        - Brightness End Time: {{ brightness_end_time }}
+        - Max Brightness: {{ max_brightness }}
+        - Current Time: {{ current_time }}
+        - Within Brightness Period: {{ within_brightness_period }}
 mode: restart
