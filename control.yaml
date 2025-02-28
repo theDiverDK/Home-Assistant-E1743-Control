@@ -150,8 +150,6 @@ action:
                 sequence:
                   - service: homeassistant.turn_off
                     target: !input target_light
-                  - condition: template
-                    value_template: "{{ target_switches | length > 0 and (not within_brightness_period) }}"
                   - service: homeassistant.turn_off
                     target:
                       entity_id: !input target_switches
@@ -179,8 +177,6 @@ action:
                 sequence:
                   - service: homeassistant.turn_off
                     target: !input target_light
-                  - condition: template
-                    value_template: "{{ target_switches | length > 0 and (not within_brightness_period) }}"
                   - service: homeassistant.turn_off
                     target:
                       entity_id: !input target_switches
